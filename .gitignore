@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+
+# Tests / tooling
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.cursor/
+*.swp
+*~
+
+# Runtime / backups (keep live INI; drop backups & caches)
+monitor_agent/data/**/*.bak*
+monitor_agent/data/**/*.bak_*
+*.log

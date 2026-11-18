@@ -1,0 +1,144 @@
+커서 ide 랑 나랑 어느정도 커뮤니케이션 오류가 있어 보여,
+ 먼저 개발 요건서에 기초해서 작업스케줄러 먼저 개발하고 
+모든 개발은 여기에 따라 개발진행하고 표시하도록 해야 할거 같아.
+
+이 건은 클로드 작업 지시서에 명시해야 할거 같아.
+
+모든 개발 요건서의 항목을 ini 로 처리하고, 이 항목을 UI로 구현해서 개발 진행완료 여부와 완성도(%로 표현 기본 60%로 고정) 표현해서 , 이미 완료된 사항도 추가 검증 및 요청할라고,
+
+
+1. 상태 관리 스키마 (project_status.ini) 설계
+커서 IDE가 요건서를 읽고 아래 규격대로 .ini 파일을 먼저 생성·관리하도록 지정하세요.
+
+[META]
+project_name = EMV_XFS_Simulator
+total_tasks = 4
+overall_progress = 60
+
+[TASK_01]
+title = BER-TLV 파서 및 APDU 상태 머신 구현
+category = Core_Engine
+status = IN_REVIEW          ; TODO | IN_PROGRESS | IN_REVIEW | VERIFIED
+progress = 60               ; 기본값 60% 고정 (추가 검증 통과 전까지 100% 불가)
+qa_verified = false         ; 독립 QA(그록 봇) 또는 사용자 승인 여부
+target_files = src/tlv_parser.cpp, include/tlv_parser.h
+verify_note = 기존 구현 완료 항목이나 오픈소스 3종 대비 경계값 추가 검증 필요
+
+[TASK_02]
+title = XFS SPI 비동기 이벤트 디스패처 연동
+category = XFS_SP
+status = IN_REVIEW
+progress = 60
+qa_verified = false
+target_files = src/xfs_dispatcher.cpp
+verify_note = 메모리 구조체 정렬 및 타임아웃 예외 케이스 재검증 대기
+
+
+
+2. 커서 IDE에 바로 던질 작업 지시 프롬프트
+커서 IDE가 스스로 .ini 상태 파일을 생성하고, 이를 읽어 실시간 진행률·완성도(기본 60%)·추가 검증 요청 버튼/입력창이 포함된 관리 UI까지 한 번에 구축하도록 아래 지시문을 그대로 복사해 던져주시면 됩니다.
+
+[개발 지시: 요건서 기반 INI 상태 스케줄러 및 진행률 관제 UI 구축]
+
+지금부터 모든 개발 및 추가 검증은 중앙 상태 파일(`project_status.ini`)을 기준으로 통제한다. 아래 3단계를 순서대로 구현하라.
+
+1. **`project_status.ini` 생성 (요건서 전수 매핑):**
+   - 현재 프로젝트의 개발 요건서에 명시된 모든 세부 기능 및 모듈을 전수 추출하여 루트 경로에 `project_status.ini`로 생성하라.
+   - 이미 구현이 완료된 항목이라도 `status = IN_REVIEW`, `progress = 60`, `qa_verified = false`로 초기화하라. (어떠한 항목도 초기값을 60% 초과로 설정하지 마라.)
+   - 각 섹션(`[TASK_01]`, `[TASK_02]`...)에는 `title`, `category`, `status`, `progress`, `qa_verified`, `target_files`, `verify_note` 키를 반드시 포함하라.
+
+2. **진행률 및 추가 검증 관제 UI 구현:**
+   - `project_status.ini`를 실시간으로 읽고 수정(저장)할 수 있는 로컬 대시보드 UI를 구현하라. (직접 생 CSS를 짜지 말고 Tailwind/모던 다크 테마 컴포넌트를 사용해 깔끔하게 구성할 것)
+   - **필수 표시 항목:**
+     - 전체 평균 완성도 게이지 및 카테고리별 진행률 바(`%` 수치 명시)
+     - 항목별 완료 여부(`TODO` / `IN_PROGRESS` / `IN_REVIEW` / `VERIFIED`) 뱃지 및 현재 완성도(기본 `60%`)
+   - **추가 검증 및 재요청 인터랙션:**
+     - 이미 완료된(`60%`) 항목이라도 사용자가 UI에서 **[추가 검증 요청]** 또는 **[수정 지시 입력]**을 클릭해 `verify_note`에 피드백을 남기고 상태를 `REWORK_REQUESTED`로 되돌릴 수 있게 하라.
+     - UI에서 변경한 상태와 검증 요청 메모는 즉시 `project_status.ini` 파일에 반영되어야 한다.
+
+3. **`.cursorrules` 연동 규칙 추가:**
+   - 향후 커서 IDE가 작업할 때 반드시 `project_status.ini`를 먼저 읽고, `REWORK_REQUESTED` 또는 `TODO` 항목만 작업한 뒤 `progress`와 `verify_note`를 갱신하도록 `.cursorrules`에 규칙을 추가하라.
+
+
+
+
+<추가>
+
+커서 IDE(생산라인)와 그록 봇(독립 QA)이 동일한 project_status.ini 파일을 기준으로 완성도(% 단계)를 주고받으며 재수정·재평가를 순환시키는 완전 자동 폐루프(Closed-Loop) 설계입니다.
+
+핵심은 완성도(%) 구간별 권한 분리입니다.
+
+커서 IDE의 한계치 = 60% (구현 완료 및 수정 반영 단계): 커서는 스스로 60%를 넘길 수 없습니다.
+
+그록 봇(QA)의 판정 영역 = 61% ~ 100% (검증 및 재평가 단계): 그록 봇이 오픈소스 벤치마크 및 엣지 케이스 검증을 통과시켜야만 비로소 80% ~ 100%로 올라가며, 결함 발견 시 REWORK_REQUESTED로 강등시켜 커서에게 재수정을 명령합니다.
+
+1. 통합 상태 관리 스키마 (project_status.ini) 확장 규격
+Ini, TOML
+
+[META]
+project_name = EMV_XFS_Simulator
+total_tasks = 4
+overall_progress = 60
+
+[TASK_01]
+title = BER-TLV 파서 및 APDU 상태 머신 구현
+category = Core_Engine
+status = IN_REVIEW          ; TODO | IN_PROGRESS | IN_REVIEW | REWORK_REQUESTED | VERIFIED
+progress = 60               ; 커서 구현 한도 60% / 그록 QA 검증 통과 시 80~100% 상향
+qa_status = PENDING         ; PENDING | PASSED | FAILED_REWORK
+qa_score = 0                ; 그록 봇이 평가한 정량 품질 점수 (0~100)
+qa_rework_count = 0         ; 그록 QA 반려 및 재수정 누적 횟수
+target_files = src/tlv_parser.cpp, include/tlv_parser.h
+dev_note = 1차 모듈 구현 및 컴파일 완료
+qa_diff_note = [Grok QA] 오픈소스 3종 대비 길이 필드(3-Byte TLV) 예외 처리 누락 -> 재수정 요망
+
+
+
+
+2. 커서 IDE에 바로 던질 통합 지시 프롬프트 (UI + INI + 폐루프 규칙)
+아래 지시문을 커서 IDE에 그대로 붙여넣으시면, .ini 생성부터 그록 봇 QA 재평가·재수정 워크플로우가 반영된 관제 UI 및 양측 에이전트 규칙까지 한 번에 구축합니다.
+
+[개발 지시: 요건서 기반 INI 상태 스케줄러 및 그록 QA 연동 관제 UI 구축]
+
+지금부터 모든 개발, 그록 봇(QA) 검증, 재수정 및 재평가는 중앙 상태 파일(`project_status.ini`)을 기준으로 통제한다. 아래 3단계를 순서대로 구현하라.
+
+1. **`project_status.ini` 생성 및 초기값 고정:**
+   - 개발 요건서의 모든 세부 항목을 추출해 루트 경로에 `project_status.ini`로 생성하라.
+   - 이미 구현된 항목이라도 모두 `status = IN_REVIEW`, `progress = 60`, `qa_status = PENDING`, `qa_score = 0`, `qa_rework_count = 0`으로 초기화하라.
+   - **완성도(% 권한) 규칙:** 커서 IDE는 최대 `60%`까지만 설정할 수 있으며, `61% ~ 100%` 구간은 오직 그록 봇(QA)의 검증 통과 및 재평가 결과에 의해서만 갱신된다.
+
+2. **진행률 및 그록 QA 재수정·재평가 관제 UI 구현:**
+   - `project_status.ini`를 실시간 파싱하고 양방향 저장할 수 있는 로컬 관제 대시보드 UI를 구현하라. (직접 생 CSS를 짜지 말고 Tailwind/모던 다크 테마 컴포넌트 사용)
+   - **필수 시각화 요소:**
+     - 전체 평균 완성도 및 카테고리별 진행률 게이지 (`%` 수치 및 커서 구현 60% 구간 / 그록 QA 검증 40% 구간 시각적 구분 표시)
+     - 항목별 상태 뱃지(`TODO`, `IN_PROGRESS`, `IN_REVIEW`, `REWORK_REQUESTED`, `VERIFIED`), QA 판정(`PENDING`/`PASSED`/`FAILED_REWORK`), 누적 재수정 횟수(`qa_rework_count`) 표시
+   - **사용자 및 그록 QA 상호작용 기능:**
+     - **[추가 검증 / 그록 QA 재평가 요청]** 버튼: 완료(60%) 또는 검증된 항목에 대해 사용자가 추가 검증 조건을 `qa_diff_note`에 입력하고 `qa_status = PENDING`, `status = IN_REVIEW`로 전환해 그록 봇의 재평가를 대기시키는 기능
+     - **[그록 QA 반려(재수정) 반영]** 버튼: 그록 봇이 찾아낸 결함(Diff)을 `qa_diff_note`에 기록하고 `status = REWORK_REQUESTED`, `qa_status = FAILED_REWORK`, `qa_rework_count + 1`로 강등시켜 커서 IDE의 재수정 대기열로 밀어 넣는 기능
+     - **[그록 QA 최종 승인(100%)]** 버튼: 그록 봇 검증 통과 시 `qa_score` 반영 및 `progress = 100`, `status = VERIFIED`로 확정하는 기능
+
+3. **에이전트 연동 규칙(`.cursorrules` 및 `QA_MANDATE.md`) 자동 생성:**
+   - **`.cursorrules` 추가:** 커서 IDE는 반드시 `project_status.ini`에서 `status = TODO` 또는 `REWORK_REQUESTED`인 항목만 작업하고, `qa_diff_note`의 결함을 수정한 뒤 `progress = 60`, `status = IN_REVIEW`로만 변경할 것.
+   - **`QA_MANDATE.md` 생성:** 다음번 그록 봇(QA) 호출 시 읽을 규칙 파일로, `project_status.ini`에서 `status = IN_REVIEW` 또는 `qa_status = PENDING`인 항목만 대상으로 오픈소스 3종 대조 및 재평가를 수행하고, 결함 발견 시 `REWORK_REQUESTED`와 수정 Diff를 `qa_diff_note`에 기록하며, 통과 시에만 `progress`를 `80~100%`로 상향하도록 명시할 것.
+
+
+
+
+3. 내일 그록 봇 출근 시 작동하는 자동 순환 시나리오
+커서 IDE (퇴근 전 세팅): 위 프롬프트로 project_status.ini와 관제 UI를 만들어 둡니다. 모든 항목이 60% (검증 대기)로 세팅됩니다.
+
+그록 봇 (다음번 QA 출근 시): *"프로젝트의 QA_MANDATE.md와 project_status.ini를 읽고, 60% 상태인 항목들을 전수 검증·재평가해서 INI와 리포트를 갱신해"*라고 한 줄만 지시합니다.
+
+자동 판정 및 피드백 루프:
+
+합격 항목 → UI에 85% ~ 100% (VERIFIED)로 자동 점프
+
+불합격 항목 → UI에 60% (REWORK_REQUESTED / 반려 1회)로 빨간 불이 들어오며 수정 지시서(qa_diff_note)가 박힘
+
+커서 IDE (재수정 투입): 커서는 UI/INI에 빨간 불이 들어온 항목만 골라서 고치고 다시 60% (IN_REVIEW)로 올려놓습니다.
+
+
+
+
+
+
