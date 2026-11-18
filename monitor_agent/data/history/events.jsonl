@@ -3770,3 +3770,6 @@
 {"ts": "2026-11-18T10:33:06+09:00", "event_type": "token_live_sync", "payload": {"used_hint": 45.72, "plan": "Premium", "renews_at": "2026-11-23T09:40:46+09:00"}}
 {"ts": "2026-11-18T10:33:20+09:00", "event_type": "token_live_sync", "payload": {"used_hint": 45.72, "plan": "Premium", "renews_at": "2026-11-23T09:40:46+09:00"}}
 {"ts": "2026-11-18T10:33:35+09:00", "event_type": "token_live_sync", "payload": {"used_hint": 45.72, "plan": "Premium", "renews_at": "2026-11-23T09:40:46+09:00"}}
+{"ts": "2026-11-18T10:33:49+09:00", "event_type": "token_live_sync", "payload": {"used_hint": 45.72, "plan": "Premium", "renews_at": "2026-11-23T09:40:46+09:00"}}
+{"ts": "2026-11-18T10:34:03+09:00", "event_type": "token_live_sync", "payload": {"used_hint": 45.72, "plan": "Premium", "renews_at": "2026-11-23T09:40:46+09:00"}}
+{"ts": "2026-11-18T10:34:17+09:00", "event_type": "token_live_sync", "payload": {"used_hint": 45.85, "plan": "Premium", "renews_at": "2026-11-23T09:40:46+09:00"}}
