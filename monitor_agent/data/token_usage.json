@@ -5,11 +5,11 @@
   "period_start": "2026-11-16T09:40:46+09:00",
   "cycle_weeks": 1,
   "weekly_included": 1000000,
-  "cursor_used": 458505,
+  "cursor_used": 460238,
   "grok_used": 0,
-  "updated_at": "2026-11-18T10:34:17+09:00",
+  "updated_at": "2026-11-18T10:38:22+09:00",
   "source": "cursor-live",
   "live_display_message": "You've used 46% of your included usage",
-  "live_total_percent": 45.85,
+  "live_total_percent": 46.02,
   "live_error": null
 }

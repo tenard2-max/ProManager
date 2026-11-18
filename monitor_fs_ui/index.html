@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FS 관제 뷰어</title>
+  <title>Central-Agent · 모니터링 콘솔</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand-block">
-        <p class="eyebrow">Central-Agent · File System Viewer</p>
+        <p class="eyebrow">Central-Agent Orchestration · Local / GitHub Pages</p>
         <h1 id="projectTitle">폴더를 선택하세요</h1>
-        <p class="muted" id="projectMeta">로컬 INI 5초 폴링 · 부모 서버와 별도</p>
+        <p class="muted" id="projectMeta">정적 모니터링 콘솔 · 로컬 docs/ 5초 폴링</p>
       </div>
       <div class="sync-info">
-        <button type="button" class="btn" id="btnPick">data 폴더 선택</button>
+        <button type="button" class="btn" id="btnPick">docs 폴더 선택</button>
         <button type="button" class="btn secondary" id="btnClear">연결 해제</button>
         <div>폴더: <span id="folderLabel" class="accent">—</span></div>
         <div>동기화: <span id="lastSync" class="accent">—</span></div>
@@ -28,13 +28,14 @@
   <main class="wrap">
     <section id="gate" class="gate">
       <div class="card setup-card">
-        <h2>관제 data 폴더 연결</h2>
+        <h2>프로젝트 docs 폴더 연결</h2>
         <p class="muted">
-          Chrome/Edge에서 <strong>monitor_agent/data</strong> 폴더를 선택하세요.
+          Chrome/Edge에서 감시할 프로젝트의 <strong>docs</strong> 폴더를 선택하세요.
           File System Access API로 <code>project_status.ini</code>를 5초마다 읽습니다.
-          기존 FastAPI 관제(<code>run_server.bat</code> / 18765)는 그대로 유지됩니다.
+          공개 URL: <strong>https://tenard2-max.github.io/ProManager/</strong>
+          (로컬: <code>open_ui.bat</code> → <code>:18766</code>)
         </p>
-        <p class="path-hint">권장 경로: <code>D:\Cursor\ProjManager\monitor_agent\data</code></p>
+        <p class="path-hint">예: <code>D:\Cursor\XFS\docs</code> · SSOT는 각 프로젝트 <code>docs/</code></p>
         <div class="setup-actions">
           <button type="button" class="btn" id="btnPick2">폴더 선택</button>
         </div>

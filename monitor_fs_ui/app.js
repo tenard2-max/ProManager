@@ -67,8 +67,8 @@ function renderState(data, tokens) {
   const overall = data.meta?.overall_progress ?? 0;
   const projectName = (data.meta?.project_name || "").trim() || "—";
   $("projectTitle").textContent = projectName;
-  $("projectMeta").textContent = `전체 ${data.meta?.total_tasks ?? "—"}항목 · 평균 ${overall}% · FS 뷰어`;
-  document.title = `${projectName} · FS 관제`;
+  $("projectMeta").textContent = `전체 ${data.meta?.total_tasks ?? "—"}항목 · 평균 ${overall}% · GitHub Pages 콘솔`;
+  document.title = `${projectName} · Central-Agent`;
   $("overallPct").textContent = `${overall}%`;
 
   renderCategoryBars("categoryBarsCursor", data.category_progress_cursor, "cursor");
@@ -148,7 +148,7 @@ async function refreshFromFs() {
 
   const statusText = await readTextFile(dirHandle, "project_status.ini");
   if (statusText == null) {
-    setWarning("project_status.ini 를 찾을 수 없습니다. monitor_agent/data 폴더를 선택했는지 확인하세요.");
+    setWarning("project_status.ini 를 찾을 수 없습니다. 해당 프로젝트의 docs 폴더를 선택했는지 확인하세요.");
     return;
   }
 
